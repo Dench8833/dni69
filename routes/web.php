@@ -15,10 +15,13 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
-
 Route::get('/home', 'HomeController@index')->name('home');
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+
+
+Auth::routes();
+Route::get('/admin', 'AdminController@index')->name('admin');
+Route::get('/admin/songs', 'SongsController@index')->name('songs');
+Route::get('/admin/verses', 'VersesController@index')->name('verses');

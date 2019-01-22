@@ -1,11 +1,12 @@
-@extends('adminlte::page')
+@extends('layouts.app')
 
-@section('title', 'AdminLTE')
+
+@section('title', 'DNI-69')
 
 @section('content_header')
-    <h1>Dashboard</h1>
+    <h1>Header</h1>
 @stop
 
 @section('content')
-    <p>You are logged in!</p>
+    <h1>Здесь будет морда сайта</h1>
 @stop
