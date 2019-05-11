@@ -23,6 +23,6 @@ class VersesController extends Controller
      */
     public function index()
     {
-        return view('verses.index');
+        return view('admin.verses.index');
     }
 }

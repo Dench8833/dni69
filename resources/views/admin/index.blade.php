@@ -3,9 +3,17 @@
 @section('title', 'DNI69')
 
 @section('content_header')
-    <h1>Общая статистика по сайту</h1>
+    <div class="container-fluid">
+        {{ Breadcrumbs::render('admin') }}
+    </div>
 @stop
 
 @section('content')
-    <p>You are logged in!</p>
-@stop
+    @include('admin.flash-message')
+    <div class="container-fluid">
+        <p>You are logged in!</p>
+    </div>
+@endsection
+{{--@section('script')
+    {{asset('js/app.js')}}
+@endsection--}}
