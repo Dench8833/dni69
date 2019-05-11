@@ -37,7 +37,7 @@ class Song extends Eloquent
 		'size' => 'int',
 		'album_id' => 'int',
 		'photo_id' => 'int',
-		'lyrics_id' => 'int'
+		'lyric_id' => 'int'
 	];
 
 	protected $dates = [
@@ -51,7 +51,7 @@ class Song extends Eloquent
 		'size',
 		'album_id',
 		'photo_id',
-		'lyrics_id',
+		'lyric_id',
 		'description',
 		'uploaded',
 		'deleted'
@@ -64,7 +64,7 @@ class Song extends Eloquent
 
 	public function lyric()
 	{
-		return $this->hasOne('\App\Models\Lyric', 'id', 'lyrics_id');
+		return $this->hasOne('\App\Models\Lyric', 'id', 'lyric_id');
 	}
 
 	public function photo()

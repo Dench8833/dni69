@@ -149,7 +149,7 @@ class SongsController extends Controller
             'size' => $songSize,
             'album_id' => $request->album,
             'photo_id' => $newPhoto->id,
-            'lyrics_id'=> $newLyrics->id,
+            'lyric_id'=> $newLyrics->id,
             'description'=> $request->description,
             'date'=> $request->date,
         ]);

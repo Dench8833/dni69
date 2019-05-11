@@ -23,7 +23,7 @@
         </div>
        <div class="col-md-6">
            <div class="row text-center">Текст песни</div>
-           <p>{{ $song }}</p>
+           <p>{{ $song->lyric->text }}</p>
            <div class="row text-center">Прикрепленные файлы</div>
            <div class="row">
                Фото: <img src="{{ asset($song->photo->path) }}" alt="" style="width:350px">

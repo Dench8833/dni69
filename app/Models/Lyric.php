@@ -30,6 +30,6 @@ class Lyric extends Eloquent
 
 	public function songs()
 	{
-		return $this->belongsTo('\App\Models\Song', 'lyrics_id');
+		return $this->belongsTo('\App\Models\Song', 'lyric_id');
 	}
 }
