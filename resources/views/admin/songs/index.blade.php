@@ -11,7 +11,7 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-9">
-                Размер загруженных файлов: <span class="total-files-size">{{--{{$totalFilesSize}}--}}</span>
+                Размер загруженных файлов: <span class="total-files-size"><b>{{$fileSize}} MB</b></span>
             </div>
             <div class="col-md-3 text-right">
                 <button type="button" class="btn btn-success">
@@ -50,20 +50,18 @@
                     <td>{{ $song->uploaded }}</td>
                     <td>{{ $song->updated_at }}</td>
                     <td style="min-width: 140px">
-                        <button type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="top" title="Просмотр">
-                            <a href="{{route('song.show', ['id' => $song->getOriginal('id')])}}">
+                        <a href="{{route('song.show', ['id' => $song->id])}}">
+                            <button type="button" class="btn action btn-secondary" data-toggle="tooltip" data-placement="top" title="Просмотр">
                                 <i class="fa fa-eye text-black" aria-hidden="true"></i>
-                            </a>
-                        </button>
-                        <button type="button" class="btn btn-success" data-toggle="tooltip" data-placement="top" title="Редактирование">
-                            <a href="{{route('song.edit', ['id' => $song->getOriginal('id')])}}">
+                            </button>
+                        </a>
+                        <a href="{{route('song.edit', ['id' => $song->id])}}">
+                            <button type="button" class="btn action btn-success" data-toggle="tooltip" data-placement="top" title="Редактирование">
                                 <i class="fa fa-pencil-square text-black" aria-hidden="true"></i>
-                            </a>
-                        </button>
-                        <button type="button" class="btn btn-danger " data-toggle="tooltip" data-placement="top" title="Удаление">
-                            <a href="{{route('song.delete', ['id' => $song->getOriginal('id')])}}">
-                                <i class="fa fa-trash text-black" aria-hidden="true"></i>
-                            </a>
+                            </button>
+                        </a>
+                        <button type="button" class="btn action-delete btn-danger " data-toggle="tooltip" data-placement="top" title="Удаление">
+                            <i class="fa fa-trash text-black" aria-hidden="true"></i>
                         </button>
                     </td>
                 </tr>
@@ -74,9 +72,18 @@
     </div>
 
 @stop
-@section('script')
-    <script>
-        alert('sdfsdfs');
-    </script>
 
-@endsection
+<script>
+    window.onload = function() {
+        $(document).ready(function () {
+            $('.action-delete').on('click', function () {
+                let massage = 'Вы действительно хотите удалить эту песню?';
+                if (confirm(massage)) {
+                    window.location.href = "{{route('song.delete', ['id' => $song->id])}}";
+                    return false;
+                }
+            });
+        });
+    };
+
+</script>

@@ -26,14 +26,13 @@
            <p>{{ $song->lyric->text }}</p>
            <div class="row text-center">Прикрепленные файлы</div>
            <div class="row">
-               Фото: <img src="{{ asset($song->photo->path) }}" alt="" style="width:350px">
+               Фото: <img src="{{ asset('storage/'.$song->photo->path) }}" alt="" style="width:350px">
            </div>
 
            <div class="row">
-               Трек: <br>
-
+               Трек:
                <audio controls>
-                   <source src="{{asset($song->path)}}" type="audio/mpeg">
+                   <source src="{{asset('storage/'.$song->path)}}" type="audio/mpeg">
                    Your browser does not support the audio element.
                </audio>
            </div>

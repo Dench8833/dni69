@@ -10,6 +10,9 @@ use App\Models\Song;
 use App\Models\Album;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\File\File;
 use Illuminate\Support\Facades\Validator;
 
@@ -33,8 +36,9 @@ class SongsController extends Controller
     public function index()
     {
         $songs = Song::with('album', 'photo', 'lyric')->paginate(15);
+        $fileSize = round(Song::sum('size')/1000000, 2);
 
-        return view('admin.songs.index', compact('songs'));
+        return view('admin.songs.index', compact('songs'), compact('fileSize'));
     }
 
     public function create()
@@ -46,17 +50,19 @@ class SongsController extends Controller
 
     public function edit($id)
     {
-        $song = Song::where('id', $id)->with('album', 'lyric', 'photo')->first();
+        $song = Song::with('album', 'lyric', 'photo')->where('id', $id)->first();
+        $albums = Album::all();
 
         return view('admin.songs.edit', [
             'id' => $id,
             'song' => $song,
+            'albums' => $albums
         ]);
     }
 
     public function show($id)
     {
-        $song = Song::findOrFail($id)->with('album', 'photo', 'lyric')->first();
+        $song = Song::with('album', 'photo', 'lyric')->where('id', $id)->first();
 
         return view('admin.songs.show', [
                 'id' => $id,
@@ -64,44 +70,127 @@ class SongsController extends Controller
             ]);
     }
 
-    public function  delete($id)
+    public function delete($id)
     {
-        $song = Song::findOrFail($id);
+        $song = Song::with('photo', 'lyric')->where('id', $id)->first();
+
+        if (!Storage::disk('public')->delete($song->photo->path)) {
+            $error = 'Файл ['.$song->photo->path.'] не был удален';
+        }
+
+        if (!Storage::disk('public')->delete($song->path)) {
+            $error = 'Файл ['.$song->path.'] не был удален';
+        }
+        $song->photo->delete();
+        $song->lyric->delete();
+        $song->delete();
+
+        if (isset($error)) {
+            return redirect()->route('songs')->with('error', $error);
+        }
 
         return redirect()->route('songs')->with('success', 'Песня "'.$song->name.'" удалена');
     }
 
     public function update(Request $request)
     {
-
-        $id = $request->id;
-        $name = $request->name;
-        $album = $request->album ?? 'Нет_альбома';
+        $this->validateForm($request->all());
+        $songId = $request->songId;
+        $thisSong = Song::with('photo')->findOrFail($songId);
+        $album = Album::findOrFail($thisSong->album_id);
+        $lyric = Lyric::findOrFail($thisSong->lyric_id);
+        $lyric->text = $request->lyrics;
+        $lyric->save();
 
         if ($request->hasFile('song')) {
             $song = $request->file('song');
             $songName = $song->getClientOriginalName();
-            $songExt = $song->getClientOriginalExtension();
             $songSize = $song->getSize();
-            $songPath = $request->song->storeAs('public', 'songs/'.$album.'/'.$songName);
-            //$file->store('public/'.$request->album);
+            $songPath = 'songs/'.$album->id.'/'.$songName;
+            Storage::disk('public')->delete($thisSong->path);
+            $request->song->storeAs('public', $songPath);
+            $thisSong->size = $songSize;
+            $thisSong->path = $songPath;
         }
 
-        /*DB::table('users')
-            ->where('id', $id)
-            ->update(['votes' => 1]);*/
-        return redirect('admin.songs.index');
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
+            $photoSize = $photo->getSize();
+            $photoName = $photo->getClientOriginalName();
+            $photoPath = 'photos/'.$album->id.'/'.$photoName;
+            Storage::disk('public')->delete($thisSong->photo->path);
+            $request->photo->storeAs('public', $photoPath);
+            $thisPhoto = Photo::findOrFail($thisSong->photo_id);
+            $thisPhoto->path = $photoPath;
+            $thisPhoto->size = $photoSize;
+            $thisPhoto->save();
+        }
+
+        $thisSong->name = $request->name;
+        $thisSong->album_id = $request->album;
+        $thisSong->show = $request->show == 'on' ? 1 : 0;
+        $thisSong->uploaded = $request->date;
+        $thisSong->description = $request->description;
+        $thisSong->save();
+
+        return redirect()->route('songs')
+            ->with('success', 'Песня ' .$request->name. ': изменения успешно сохранены.');
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $this->validateForm($request->all());
+
+        $albumId = $request->album;
+
+        if ($request->hasFile('song')) {
+            $song = $request->file('song');
+            $songName = $song->getClientOriginalName();
+            $songSize = $song->getSize();
+            $songPath = 'songs/'.$albumId.'/'.$songName;
+            $request->song->storeAs('public', $songPath);
+        }
+
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
+            $size = $photo->getSize();
+            $photoName = $photo->getClientOriginalName();
+            $pathPhoto = 'photos/'.$albumId.'/'.$photoName;
+            $request->photo->storeAs('public', $pathPhoto);
+            $newPhoto = Photo::create([
+                'size' => $size,
+                'path' => $pathPhoto
+            ]);
+        }
+
+        if ($request->lyrics) {
+            $newLyrics = Lyric::create([
+                'text' => $request->lyrics
+            ]);
+        }
+
+        $newSong = Song::create([
+            'name' => $request->name,
+            'path' => $songPath,
+            'size' => $songSize,
+            'album_id' => $albumId,
+            'photo_id' => $newPhoto->id,
+            'lyric_id'=> $newLyrics->id,
+            'description'=> $request->description,
+            'date'=> $request->date,
+        ]);
+
+        return redirect()->route('songs')->with('success', 'Песня ' .$songName. ' успешно добавлена в базу');
+    }
+
+    private function validateForm($input) {
+        $validator = Validator::make($input, [
             'album' => 'string|max:255|nullable',
             'date' => 'date',
             'description' => 'string|nullable',
@@ -114,46 +203,5 @@ class SongsController extends Controller
             'photo.mimes' => 'Только jpeg,jpg,png файлы!',
             'date.date' => 'Неверный формат даты!'
         ])->validate();
-
-        $album = $request->album;
-
-        if ($request->hasFile('song')) {
-            $song = $request->file('song');
-            $songName = $song->getClientOriginalName();
-            $songSize = $song->getSize();
-            $songPath = 'songs/'.$album.'/'.$songName;
-            $request->song->storeAs('public', $songPath);
-        }
-
-        if ($request->hasFile('photo')) {
-            $photo = $request->file('photo');
-            $size = $photo->getSize();
-            $photoName = $photo->getClientOriginalName();
-            $pathPhoto = 'photos/'.$album.'/'.$photoName;
-            $request->photo->storeAs('public', $pathPhoto);
-            $newPhoto = Photo::create([
-                'size' => $size,
-                'path' => 'storage/'.$pathPhoto
-            ]);
-        }
-
-        if ($request->lyrics) {
-            $newLyrics = Lyric::create([
-                'text' => $request->lyrics
-            ]);
-        }
-
-        $newSong = Song::create([
-            'name' => $request->name,
-            'path' => 'storage/'.$songPath,
-            'size' => $songSize,
-            'album_id' => $request->album,
-            'photo_id' => $newPhoto->id,
-            'lyric_id'=> $newLyrics->id,
-            'description'=> $request->description,
-            'date'=> $request->date,
-        ]);
-
-        return redirect()->route('songs')->with('success', 'Песня ' .$songName. ' успешно добавлена в базу');
     }
 }

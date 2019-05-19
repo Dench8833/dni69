@@ -20,7 +20,7 @@
         <div class="form-group">
             <label for="date">Дата написания:</label>
             <input type="date" class="form-control" name="date"
-                   value="{{ old('date') ?? \Illuminate\Support\Carbon::today()->format('d.m.Y') }}"/>
+                   value="{{ old('date') ?? \Illuminate\Support\Carbon::today()->format('Y-m-d') }}"/>
         </div>
         <div class="form-group">
             <label for="description">Описание:</label>
@@ -43,6 +43,10 @@
         </div>
     </div>
 </div>
+
+@if(isset($id))
+    <input type="hidden" name="songId" value="{{ $id }}">
+@endif
 <div class="row text-center">
     <button type="submit" class="btn btn-primary">Сохранить</button>
 </div>
