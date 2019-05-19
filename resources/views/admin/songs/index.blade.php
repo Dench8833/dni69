@@ -60,7 +60,9 @@
                                 <i class="fa fa-pencil-square text-black" aria-hidden="true"></i>
                             </button>
                         </a>
-                        <button type="button" class="btn action-delete btn-danger " data-toggle="tooltip" data-placement="top" title="Удаление">
+                        <button type="button" class="btn action-delete btn-danger"
+                                data-route="{{ route('song.delete', ['id' => $song->id]) }}"
+                                data-toggle="tooltip" data-placement="top" title="Удаление">
                             <i class="fa fa-trash text-black" aria-hidden="true"></i>
                         </button>
                     </td>
@@ -79,7 +81,7 @@
             $('.action-delete').on('click', function () {
                 let massage = 'Вы действительно хотите удалить эту песню?';
                 if (confirm(massage)) {
-                    window.location.href = "{{route('song.delete', ['id' => $song->id])}}";
+                    window.location.href = $('.action-delete').data('route');
                     return false;
                 }
             });
