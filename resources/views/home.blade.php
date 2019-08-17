@@ -14,10 +14,10 @@
     <div class="container">
         <h1>Здесь будет морда сайта</h1>
 
-        <audio controls>
+        {{--<audio controls>
             <source src="{{asset('storage/songs/Тверь/RedHotChiliPeppers-ByTheWay.mp3')}}" type="audio/mpeg">
             Your browser does not support the audio element.
-        </audio>
+        </audio>--}}
     </div>
 
 

@@ -154,6 +154,7 @@ class SongsController extends Controller
             $songName = $song->getClientOriginalName();
             $songSize = $song->getSize();
             $songPath = 'songs/'.$albumId.'/'.$songName;
+
             $request->song->storeAs('public', $songPath);
         }
 

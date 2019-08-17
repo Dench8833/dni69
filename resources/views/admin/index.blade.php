@@ -14,6 +14,4 @@
         <p>You are logged in!</p>
     </div>
 @endsection
-{{--@section('script')
-    {{asset('js/app.js')}}
-@endsection--}}
+

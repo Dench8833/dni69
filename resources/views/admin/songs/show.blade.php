@@ -7,6 +7,15 @@
 @stop
 
 @section('content')
+
+    <div class="text-right">
+        <button type="button" class="btn btn-success">
+            <a href="{{ url('admin/song/edit/'.$id) }}">
+                <span style="color: white;">Редактировать</span>
+            </a>
+        </button>
+    </div>
+
     <div class="row">
         <div class="col-md-6">
             <div class="row text-center">Основные данные</div>
@@ -23,7 +32,9 @@
         </div>
        <div class="col-md-6">
            <div class="row text-center">Текст песни</div>
-           <p>{{ $song->lyric->text }}</p>
+           <div class="row">
+               {!! $song->lyric->text !!}
+           </div>
            <div class="row text-center">Прикрепленные файлы</div>
            <div class="row">
                Фото: <img src="{{ asset('storage/'.$song->photo->path) }}" alt="" style="width:350px">

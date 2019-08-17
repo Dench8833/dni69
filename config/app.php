@@ -178,6 +178,8 @@ return [
         App\Providers\RouteServiceProvider::class,
         Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
         Reliese\Coders\CodersServiceProvider::class,
+        Unisharp\Ckeditor\ServiceProvider::class,
+
     ],
 
     /*
