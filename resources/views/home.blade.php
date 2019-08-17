@@ -9,7 +9,7 @@
 
 @section('content')
     <video autoplay loop id="video-background" muted>
-        <source src="{{ asset('storage/mp4/mig.mp4') }}" type="video/mp4">
+        <source src="#" type="video/mp4">
     </video>
     <div class="container">
         <h1>Здесь будет морда сайта</h1>
