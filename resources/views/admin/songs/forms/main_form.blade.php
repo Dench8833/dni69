@@ -35,7 +35,7 @@
     <div class="col-md-6">
         <div class="form-group">
             <label for="lyrics">Текст песни:</label>
-            <textarea id="summary-ckeditor" type="text" class="form-control" name="lyrics" rows="15">{{ old('lyrics') ?? $song->lyric->text ?? '' }}</textarea>
+            <textarea id="summary-ckeditor" type="text" class="form-control" name="text" rows="15">{{ old('lyrics') ?? $song->lyric->text ?? '' }}</textarea>
         </div>
         <div class="form-group">
             <label for="song">Загрузить песню:</label>

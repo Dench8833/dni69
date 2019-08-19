@@ -16,7 +16,7 @@
             </a>
         </button>
     </div>
-    <form method="post" action="{{route('song.update')}}" enctype="multipart/form-data">
+    <form method="post" action="{{ route('song.update') }}" enctype="multipart/form-data">
         @csrf
         @include('admin.songs.forms.main_form')
     </form>

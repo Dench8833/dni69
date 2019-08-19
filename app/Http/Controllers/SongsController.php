@@ -81,8 +81,15 @@ class SongsController extends Controller
         if (!Storage::disk('public')->delete($song->path)) {
             $error = 'Файл ['.$song->path.'] не был удален';
         }
-        $song->photo->delete();
-        $song->lyric->delete();
+
+        if (isset($song->photo)) {
+            $song->photo->delete();
+        }
+
+        if (isset($song->lyric)) {
+            $song->lyric->delete();
+        }
+
         $song->delete();
 
         if (isset($error)) {
@@ -96,17 +103,13 @@ class SongsController extends Controller
     {
         $this->validateForm($request->all());
         $songId = $request->songId;
-        $thisSong = Song::with('photo')->findOrFail($songId);
-        $album = Album::findOrFail($thisSong->album_id);
-        $lyric = Lyric::findOrFail($thisSong->lyric_id);
-        $lyric->text = $request->lyrics;
-        $lyric->save();
+        $thisSong = Song::with('photo', 'lyric')->findOrFail($songId);
 
         if ($request->hasFile('song')) {
             $song = $request->file('song');
             $songName = $song->getClientOriginalName();
             $songSize = $song->getSize();
-            $songPath = 'songs/'.$album->id.'/'.$songName;
+            $songPath = 'songs/'.$thisSong->album->id.'/'.$songName;
             Storage::disk('public')->delete($thisSong->path);
             $request->song->storeAs('public', $songPath);
             $thisSong->size = $songSize;
@@ -114,16 +117,16 @@ class SongsController extends Controller
         }
 
         if ($request->hasFile('photo')) {
+            Storage::disk('public')->delete($thisSong->photo->path);
             $photo = $request->file('photo');
             $photoSize = $photo->getSize();
             $photoName = $photo->getClientOriginalName();
-            $photoPath = 'photos/'.$album->id.'/'.$photoName;
-            Storage::disk('public')->delete($thisSong->photo->path);
+            $photoPath = 'photos/'.$thisSong->album->id.'/'.$photoName;
             $request->photo->storeAs('public', $photoPath);
             $thisPhoto = Photo::findOrFail($thisSong->photo_id);
             $thisPhoto->path = $photoPath;
             $thisPhoto->size = $photoSize;
-            $thisPhoto->save();
+            $thisPhoto->update();
         }
 
         $thisSong->name = $request->name;
@@ -131,7 +134,9 @@ class SongsController extends Controller
         $thisSong->show = $request->show == 'on' ? 1 : 0;
         $thisSong->uploaded = $request->date;
         $thisSong->description = $request->description;
-        $thisSong->save();
+        $thisSong->lyric->text = $request->text ?? '';
+        $thisSong->lyric->save();
+        $thisSong->update();
 
         return redirect()->route('songs')
             ->with('success', 'Песня ' .$request->name. ': изменения успешно сохранены.');
@@ -170,9 +175,9 @@ class SongsController extends Controller
             ]);
         }
 
-        if ($request->lyrics) {
+        if (isset($request->lyrics)) {
             $newLyrics = Lyric::create([
-                'text' => $request->lyrics
+                'text' => $request->text
             ]);
         }
 
@@ -181,8 +186,8 @@ class SongsController extends Controller
             'path' => $songPath,
             'size' => $songSize,
             'album_id' => $albumId,
-            'photo_id' => $newPhoto->id,
-            'lyric_id'=> $newLyrics->id,
+            'photo_id' => $newPhoto->id ?? null,
+            'lyric_id'=> $newLyrics->id ?? null,
             'description'=> $request->description,
             'date'=> $request->date,
         ]);

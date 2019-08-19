@@ -33,7 +33,7 @@
        <div class="col-md-6">
            <div class="row text-center">Текст песни</div>
            <div class="row">
-               {!! $song->lyric->text !!}
+               {!! $song->lyric->text ?? '' !!}
            </div>
            <div class="row text-center">Прикрепленные файлы</div>
            <div class="row">
@@ -43,11 +43,10 @@
            <div class="row">
                Трек:
                <audio controls>
-                   <source src="{{asset('storage/'.$song->path)}}" type="audio/mpeg">
+                   <source src="{{ asset('storage/'.$song->path) }}" type="audio/mpeg">
                    Your browser does not support the audio element.
                </audio>
            </div>
        </div>
-
     </div>
 @endsection
